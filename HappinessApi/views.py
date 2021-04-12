@@ -1,7 +1,9 @@
 from django.shortcuts import render
-from .models import Country
 from django.http import HttpResponseNotFound
 import json
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import authentication, permissions
 from rest_framework import status    
 from rest_framework.response import Response
 from django.shortcuts import get_list_or_404, get_object_or_404
@@ -9,42 +11,41 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 from .serializers import CountrySerializer
-# Create your views here.
-def error404(request, exception=None):
+from .CSV_Handler import *
+
+
+country_obj=CsvExecuter()
+
+class CountryData(APIView):
+
+    def get(self,request,country):
+       # country_name = self.request.query_params.get('country',None)
+        country_data={
+            'data':country_obj.get_country_details(country)
+          } 
+        return JsonResponse(country_data, safe=False)  
+
+class CountryList(APIView):
+
+    def get(self,request):
+        
+        from_score=request.query_params.get('from', None)
+        to_score=request.query_params.get('to', None)
+        
+        from_score=float(from_score)
+        to_score=float(to_score)
+
+        
+        
+        if from_score is not None and to_score is not None:
+            country_data={
+               'data':country_obj.get_countries_within_scores(from_score,to_score)
+            } 
+            return JsonResponse(country_data, safe=False)   
+        else:
+             return JsonResponse({'detail':'Query Paramas Cannot be null',
+             'status_code':400,
+             'error':'BAD REQUEST'
+             })    
+
     
-    return JsonResponse({
-        'status_code': 404,
-        'error': 'The resource was not found'
-    },safe=False,status=404)
-
-def error500(request, exception=None):
-    return JsonResponse({
-        'status_code': 500,
-        'error': 'Internal Server Error'
-    },safe=False)
-
-def error400(request, exception=None):
-    return JsonResponse({
-        'status_code': 400,
-        'error': 'Bad Request'
-    },status=status.HTTP_400_BAD_REQUEST)
-def error403(request, exception=None):
-    return JsonResponse({
-        'status_code': 403,
-        'error': 'Request Forbidden'
-    },status=status.HTTP_403_FORBIDDEN)
-
-
-def CountryData(request,country):
-    
-    country=get_object_or_404(Country,CountryName=country)
-    serializer=CountrySerializer(country)
-    return JsonResponse(serializer.data, safe=False)  
-
-def ScoreData(request,from_score,to_score):
-    from_score=float(from_score)
-    to_score=float(to_score)
-    countries_score=Country.objects.filter(LadderScore__gte=from_score,LadderScore__lte=to_score)
-    serializer=CountrySerializer(country,many=True)
-    return JsonResponse(serializer.data, safe=False)
-

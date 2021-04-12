@@ -15,13 +15,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
-from HappinessApi.views import *
+from django.conf import settings
+from django.conf.urls.static import static
+from utils.views import *
 from django.conf.urls import (
   handler400, handler403, handler404, handler500)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('v1/',include('HappinessApi.urls')),
-]
+    path('',include('HappinessApi.urls')),
+]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 handler404 = error404
 handler500 = error500
 handler403 = error403

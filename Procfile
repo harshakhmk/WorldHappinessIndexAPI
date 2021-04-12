@@ -1,1 +1,1 @@
-web :gunicorn WHIProject.wsgi --log-file -
+web: gunicorn WHIProject.wsgi --log-file -

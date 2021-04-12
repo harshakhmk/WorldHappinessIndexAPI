@@ -1,14 +1,11 @@
-from django.urls import path,include,register_converter
+from django.urls import path,include,register_converter,re_path
 from .views import *
-from . import converters
 
-
-register_converter(converters.FloatUrlParameterConverter, 'float')
 
 urlpatterns = [
-   path('country/<str:country>',CountryData,name="countryData"),
-   #path('score-range/?<float:from_score>',ScoreData,name="scoreRange"),
-   #path(r"^score-range/(?P<from_score>\d+\.\d+)$/(?P<to_score>\d+\.\d+)$", ScoreData, name="scoreRange"),
-   path('score-range/?from=<str:from_score>&to=<str:to_score>',ScoreData, name="scoreRange"),
+   
+   path('country/<str:country>',CountryData.as_view(),name="CountryData"),
+   path('score-range/',CountryList.as_view(),name="ScoreRange"),
+   
 
 ]
